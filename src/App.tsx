@@ -46,6 +46,9 @@ interface ContractStats {
   totalTickets: bigint;
   lastLotteryTime: bigint;
   ticketPrice: bigint;
+  lotteryInterval: bigint;
+  prizeDenominator: bigint;
+  maxParticipants: bigint;
 }
 
 interface UserStats {
@@ -53,6 +56,7 @@ interface UserStats {
   stakedBalance: bigint;
   earnedRewards: bigint;
   tokenAllowance: bigint;
+  decimals: number;
 }
 
 type Tab = 'stats' | 'stake' | 'rewards' | 'info';
@@ -122,7 +126,10 @@ export default function App() {
         participantCount,
         totalTickets,
         lastLotteryTime,
-        ticketPrice
+        ticketPrice,
+        lotteryInterval,
+        prizeDenominator,
+        maxParticipants
       ] = await Promise.all([
         lotteryContract.totalStaked(),
         lotteryContract.totalPool(),
@@ -130,7 +137,10 @@ export default function App() {
         lotteryContract.getCurrentParticipantCount(),
         lotteryContract.getCurrentTotalTickets(),
         lotteryContract.lastLotteryTime(),
-        lotteryContract.TICKET_PRICE()
+        lotteryContract.TICKET_PRICE(),
+        lotteryContract.LOTTERY_INTERVAL(),
+        lotteryContract.PRIZE_DENOMINATOR(),
+        lotteryContract.MAX_PARTICIPANTS_PER_ROUND()
       ]);
 
       setStats({
@@ -140,22 +150,27 @@ export default function App() {
         participantCount,
         totalTickets,
         lastLotteryTime,
-        ticketPrice
+        ticketPrice,
+        lotteryInterval,
+        prizeDenominator,
+        maxParticipants
       });
 
       if (account && ethers.isAddress(account)) {
-        const [balance, stakedBalance, earnedRewards, tokenAllowance] = await Promise.all([
+        const [balance, stakedBalance, earnedRewards, tokenAllowance, decimals] = await Promise.all([
           tokenContract.balanceOf(account),
           lotteryContract.balanceOf(account),
           lotteryContract.earned(account),
-          tokenContract.allowance(account, LOTTERY_CONTRACT_ADDRESS)
+          tokenContract.allowance(account, LOTTERY_CONTRACT_ADDRESS),
+          tokenContract.decimals()
         ]);
 
         setUserStats({
           balance,
           stakedBalance,
           earnedRewards,
-          tokenAllowance
+          tokenAllowance,
+          decimals: Number(decimals)
         });
       }
     } catch (err) {
@@ -172,11 +187,11 @@ export default function App() {
   }, [provider, fetchData]);
 
   useEffect(() => {
-    if (!stats?.lastLotteryTime) return;
+    if (!stats?.lastLotteryTime || !stats?.lotteryInterval) return;
 
     const interval = setInterval(() => {
       const now = Math.floor(Date.now() / 1000);
-      const nextDraw = Number(stats.lastLotteryTime) + 1800; // 30 minutes
+      const nextDraw = Number(stats.lastLotteryTime) + Number(stats.lotteryInterval);
       const diff = nextDraw - now;
 
       if (diff <= 0) {
@@ -391,7 +406,7 @@ export default function App() {
                     title={t.participants} 
                     value={stats ? stats.participantCount.toString() : "0"} 
                     icon={Users}
-                    subValue={t.maxParticipants}
+                    subValue={stats ? `Max ${stats.maxParticipants.toString()}` : t.maxParticipants}
                   />
                   <StatCard 
                     title={t.totalTickets} 
@@ -583,15 +598,22 @@ export default function App() {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-slate-500">{t.interval}</span>
-                      <span className="font-medium text-slate-900">30 Minutes</span>
+                      <span className="font-medium text-slate-900">
+                        {stats ? `${Number(stats.lotteryInterval) / 60} Minutes` : "---"}
+                      </span>
                     </div>
                     
                     <button 
                       onClick={handleDraw}
-                      disabled={txPending || !account}
-                      className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 disabled:opacity-50 py-4 rounded-2xl font-bold transition-all active:scale-95 flex items-center justify-center gap-2"
+                      disabled={txPending || !account || timeLeft !== '00:00' || stats?.participantCount === 0n}
+                      className={cn(
+                        "w-full py-4 rounded-2xl font-bold transition-all active:scale-95 flex items-center justify-center gap-2",
+                        timeLeft === '00:00' && stats?.participantCount !== 0n
+                          ? "bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-100"
+                          : "bg-slate-100 text-slate-400"
+                      )}
                     >
-                      {t.drawRound.replace('{round}', stats?.currentRound.toString() || '1')}
+                      {timeLeft === '00:00' && stats?.participantCount !== 0n ? t.drawReady : t.drawRound.replace('{round}', stats?.currentRound.toString() || '1')}
                     </button>
                     <p className="text-[10px] text-center text-slate-400">{t.drawNote}</p>
                   </div>
@@ -628,7 +650,9 @@ export default function App() {
                       <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg flex-shrink-0">3</div>
                       <div>
                         <h3 className="text-lg font-bold mb-2">{t.step3Title}</h3>
-                        <p className="text-sm text-slate-500 leading-relaxed">{t.step3Desc}</p>
+                        <p className="text-sm text-slate-500 leading-relaxed">
+                          {stats ? t.step3Desc.replace('1/160', `1/${stats.prizeDenominator.toString()}`) : t.step3Desc}
+                        </p>
                       </div>
                     </div>
                   </div>
