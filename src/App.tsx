@@ -69,6 +69,7 @@ export default function App() {
 
   const [stats, setStats] = useState<ContractStats | null>(null);
   const [userStats, setUserStats] = useState<UserStats | null>(null);
+  const [timeLeft, setTimeLeft] = useState<string>('00:00');
 
   const [stakeAmount, setStakeAmount] = useState('');
   const [ticketCount, setTicketCount] = useState('1');
@@ -104,8 +105,9 @@ export default function App() {
     if (!provider) return;
 
     // Defensive check for addresses
-    if (!ethers.isAddress(LOTTERY_CONTRACT_ADDRESS) || !ethers.isAddress(TOKEN_CONTRACT_ADDRESS)) {
-      console.warn("Invalid contract addresses detected. Please update src/contracts/config.ts");
+    const isPlaceholder = (addr: string) => !ethers.isAddress(addr) || addr === ethers.ZeroAddress;
+    if (isPlaceholder(LOTTERY_CONTRACT_ADDRESS) || isPlaceholder(TOKEN_CONTRACT_ADDRESS)) {
+      console.warn("Contract addresses are still placeholders. Please update src/contracts/config.ts");
       return;
     }
 
@@ -168,6 +170,26 @@ export default function App() {
       return () => clearInterval(interval);
     }
   }, [provider, fetchData]);
+
+  useEffect(() => {
+    if (!stats?.lastLotteryTime) return;
+
+    const interval = setInterval(() => {
+      const now = Math.floor(Date.now() / 1000);
+      const nextDraw = Number(stats.lastLotteryTime) + 1800; // 30 minutes
+      const diff = nextDraw - now;
+
+      if (diff <= 0) {
+        setTimeLeft('00:00');
+      } else {
+        const mins = Math.floor(diff / 60);
+        const secs = diff % 60;
+        setTimeLeft(`${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [stats?.lastLotteryTime]);
 
   const handleAction = async (action: () => Promise<any>, successMsg: string) => {
     if (!provider || !account) return;
@@ -281,7 +303,7 @@ export default function App() {
               <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
                 <Trophy className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold tracking-tight text-slate-900">LottoStake</span>
+              <span className="text-xl font-bold tracking-tight text-slate-900">马彩大乐透</span>
             </div>
             
             <div className="flex items-center gap-2 sm:gap-4">
@@ -548,6 +570,12 @@ export default function App() {
 
                   <div className="space-y-4">
                     <div className="flex justify-between text-sm">
+                      <span className="text-slate-500">{t.countdown}</span>
+                      <span className="font-mono font-bold text-emerald-600 text-lg">
+                        {timeLeft}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
                       <span className="text-slate-500">{t.lastDraw}</span>
                       <span className="font-medium text-slate-900">
                         {stats ? new Date(Number(stats.lastLotteryTime) * 1000).toLocaleTimeString() : "---"}
@@ -628,7 +656,7 @@ export default function App() {
             <div className="w-6 h-6 bg-emerald-500 rounded flex items-center justify-center">
               <Trophy className="w-4 h-4 text-white" />
             </div>
-            <span className="font-bold text-slate-900">LottoStake</span>
+            <span className="font-bold text-slate-900">马彩大乐透</span>
           </div>
           <p className="text-sm text-slate-500 max-w-md mx-auto">
             {t.footerDesc}
