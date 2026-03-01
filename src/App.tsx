@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { ethers } from 'ethers';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, LayoutGroup } from 'motion/react';
 import { 
   Wallet, 
   Trophy, 
@@ -302,8 +302,8 @@ export default function App() {
       {activeTab === id && (
         <motion.div 
           layoutId="nav-indicator"
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-emerald-500 rounded-t-full"
-          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+          className="absolute bottom-0 w-8 h-1 bg-emerald-500 rounded-t-full"
+          transition={{ type: "spring", stiffness: 380, damping: 30 }}
         />
       )}
     </button>
@@ -633,6 +633,17 @@ export default function App() {
                 <section className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
                   <h2 className="text-xl font-bold text-slate-900 mb-8">{t.howItWorksTitle}</h2>
                   <div className="space-y-8">
+                    {/* Warning Section */}
+                    <div className="p-6 bg-red-50 border border-red-100 rounded-2xl flex gap-4 items-start">
+                      <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-1" />
+                      <div>
+                        <h3 className="text-lg font-bold text-red-700 mb-1">{t.warningTitle}</h3>
+                        <p className="text-sm text-red-600 font-medium leading-relaxed">
+                          {t.warningDesc}
+                        </p>
+                      </div>
+                    </div>
+
                     <div className="flex gap-6">
                       <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg flex-shrink-0">1</div>
                       <div>
@@ -666,12 +677,14 @@ export default function App() {
 
       {/* Bottom Navigation (Mobile & Desktop) */}
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-lg border-t border-slate-100 px-4 pb-safe">
-        <div className="max-w-lg mx-auto flex items-center justify-between relative">
-          <NavItem id="stats" icon={LayoutDashboard} label={t.nav.stats} />
-          <NavItem id="stake" icon={Ticket} label={t.nav.stake} />
-          <NavItem id="rewards" icon={Coins} label={t.nav.rewards} />
-          <NavItem id="info" icon={Info} label={t.nav.howItWorks} />
-        </div>
+        <LayoutGroup>
+          <div className="max-w-lg mx-auto flex items-center justify-between relative">
+            <NavItem id="stats" icon={LayoutDashboard} label={t.nav.stats} />
+            <NavItem id="stake" icon={Ticket} label={t.nav.stake} />
+            <NavItem id="rewards" icon={Coins} label={t.nav.rewards} />
+            <NavItem id="info" icon={Info} label={t.nav.howItWorks} />
+          </div>
+        </LayoutGroup>
       </div>
 
       {/* Footer (Hidden on mobile due to bottom nav) */}

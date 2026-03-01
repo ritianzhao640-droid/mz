@@ -42,6 +42,8 @@ export const translations = {
     footerDesc: "A decentralized lottery and staking protocol. Stake tokens, earn WBNB, and win big every 30 minutes.",
     countdown: "Next Draw in",
     drawReady: "Ready to Draw!",
+    warningTitle: "Important Notice",
+    warningDesc: "Staking tokens is equivalent to burning them. You gain dividend weight but permanently lose ownership and the ability to withdraw the staked tokens.",
     links: {
       contract: "Contract",
       whitepaper: "Whitepaper",
@@ -103,6 +105,8 @@ export const translations = {
     footerDesc: "去中心化彩票和质押协议。质押代币，赚取 WBNB，每 30 分钟赢取大奖。",
     countdown: "距离下次开奖",
     drawReady: "可以开奖！",
+    warningTitle: "重要注意",
+    warningDesc: "质押代币等于销毁代币。您获得分红权重，但将永久失去已质押代币的所有权和取回权。",
     links: {
       contract: "合约地址",
       whitepaper: "白皮书",
