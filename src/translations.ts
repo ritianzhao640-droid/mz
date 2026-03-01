@@ -1,0 +1,120 @@
+export const translations = {
+  en: {
+    nav: {
+      stats: "Stats",
+      stake: "Stake",
+      rewards: "Rewards",
+      howItWorks: "How it Works"
+    },
+    connectWallet: "Connect Wallet",
+    connecting: "Connecting...",
+    totalStaked: "Total Staked",
+    prizePool: "Prize Pool",
+    participants: "Participants",
+    totalTickets: "Total Tickets",
+    round: "Round",
+    maxParticipants: "Max 100",
+    stakingPool: "Staking Pool",
+    stakingDesc: "Stake tokens to earn WBNB dividends.",
+    nonRedeemableWarning: "⚠️ NON-REDEEMABLE: Once staked, tokens CANNOT be withdrawn. They are permanently locked to provide dividend weight.",
+    yourBalance: "Your Balance",
+    stakeTokens: "Stake Tokens",
+    buyTickets: "Buy Tickets",
+    buyTicketsDesc: "Each ticket costs {price} TOKEN. Buying tickets increases the prize pool.",
+    pricePerTicket: "Price per Ticket",
+    buyN: "Buy {count} Tickets",
+    wbnbRewards: "WBNB Rewards",
+    unclaimedDividends: "Unclaimed Dividends",
+    basedOnStaked: "Based on {amount} staked tokens",
+    claimWbnb: "Claim WBNB",
+    drawLottery: "Draw Lottery",
+    lastDraw: "Last Draw",
+    interval: "Interval",
+    drawRound: "Draw Round #{round}",
+    drawNote: "Anyone can trigger the draw after 30 minutes.",
+    howItWorksTitle: "How it Works",
+    step1Title: "Stake or Buy",
+    step1Desc: "Stake tokens to earn WBNB dividends. Buy lottery tickets for a chance to win the jackpot.",
+    step2Title: "Earn WBNB",
+    step2Desc: "A 3% tax on all token transactions is distributed to stakers in WBNB.",
+    step3Title: "Win the Jackpot",
+    step3Desc: "Every 30 minutes, 3 winners are chosen to split 1/160 of the total pool.",
+    footerDesc: "A decentralized lottery and staking protocol. Stake tokens, earn WBNB, and win big every 30 minutes.",
+    links: {
+      contract: "Contract",
+      whitepaper: "Whitepaper",
+      community: "Community"
+    },
+    errors: {
+      installWallet: "Please install MetaMask or another Web3 wallet.",
+      connectFailed: "Failed to connect wallet.",
+      txFailed: "Transaction failed."
+    },
+    success: {
+      approval: "Approval successful!",
+      staking: "Staking successful!",
+      tickets: "Tickets purchased!",
+      rewards: "Rewards claimed!",
+      draw: "Lottery drawn!"
+    }
+  },
+  zh: {
+    nav: {
+      stats: "统计",
+      stake: "质押/购票",
+      rewards: "奖励/开奖",
+      howItWorks: "玩法说明"
+    },
+    connectWallet: "连接钱包",
+    connecting: "连接中...",
+    totalStaked: "总质押量",
+    prizePool: "奖金池",
+    participants: "参与人数",
+    totalTickets: "总票数",
+    round: "轮次",
+    maxParticipants: "上限 100",
+    stakingPool: "质押池",
+    stakingDesc: "质押代币以赚取 WBNB 分红。",
+    nonRedeemableWarning: "⚠️ 不可赎回警告：代币一旦质押，将无法取回。质押金额将永久锁定以提供分红权重。",
+    yourBalance: "您的余额",
+    stakeTokens: "质押代币",
+    buyTickets: "购买彩票",
+    buyTicketsDesc: "每张票价格为 {price} TOKEN。购票金额将直接进入奖金池。",
+    pricePerTicket: "单价",
+    buyN: "购买 {count} 张票",
+    wbnbRewards: "WBNB 奖励",
+    unclaimedDividends: "待领取分红",
+    basedOnStaked: "基于 {amount} 个质押代币",
+    claimWbnb: "领取 WBNB",
+    drawLottery: "执行开奖",
+    lastDraw: "上次开奖",
+    interval: "开奖间隔",
+    drawRound: "开启第 #{round} 轮开奖",
+    drawNote: "30分钟后，任何人都可以触发开奖。",
+    howItWorksTitle: "玩法说明",
+    step1Title: "质押或购票",
+    step1Desc: "质押代币以赚取 WBNB 分红。购买彩票以获得赢取大奖的机会。",
+    step2Title: "赚取 WBNB",
+    step2Desc: "所有代币交易的 3% 税费将以 WBNB 形式分配给质押者。",
+    step3Title: "赢得大奖",
+    step3Desc: "每 30 分钟抽取 3 名中奖者，平分总奖池的 1/160。",
+    footerDesc: "去中心化彩票和质押协议。质押代币，赚取 WBNB，每 30 分钟赢取大奖。",
+    links: {
+      contract: "合约地址",
+      whitepaper: "白皮书",
+      community: "社区"
+    },
+    errors: {
+      installWallet: "请安装 MetaMask 或其他 Web3 钱包。",
+      connectFailed: "连接钱包失败。",
+      txFailed: "交易失败。"
+    },
+    success: {
+      approval: "授权成功！",
+      staking: "质押成功！",
+      tickets: "购票成功！",
+      rewards: "领取成功！",
+      draw: "开奖成功！"
+    }
+  }
+};
