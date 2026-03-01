@@ -293,16 +293,17 @@ export default function App() {
     <button
       onClick={() => setActiveTab(id)}
       className={cn(
-        "flex flex-col items-center justify-center flex-1 py-2 gap-1 transition-all",
+        "relative flex flex-col items-center justify-center flex-1 py-3 gap-1 transition-colors",
         activeTab === id ? "text-emerald-600" : "text-slate-400 hover:text-slate-600"
       )}
     >
-      <Icon className={cn("w-5 h-5", activeTab === id && "animate-pulse")} />
+      <Icon className={cn("w-5 h-5 transition-transform", activeTab === id && "scale-110")} />
       <span className="text-[10px] font-bold uppercase tracking-wider">{label}</span>
       {activeTab === id && (
         <motion.div 
           layoutId="nav-indicator"
-          className="absolute bottom-0 w-8 h-1 bg-emerald-500 rounded-t-full"
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-emerald-500 rounded-t-full"
+          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
         />
       )}
     </button>
