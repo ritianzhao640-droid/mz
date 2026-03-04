@@ -62,7 +62,7 @@ interface UserStats {
 type Tab = 'stats' | 'stake' | 'rewards' | 'info';
 
 export default function App() {
-  const [lang, setLang] = useState<'en' | 'zh'>('en');
+  const [lang, setLang] = useState<'en' | 'zh'>('zh');
   const [activeTab, setActiveTab] = useState<Tab>('stats');
   const [account, setAccount] = useState<string | null>(null);
   const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
@@ -78,10 +78,44 @@ export default function App() {
   const [stakeAmount, setStakeAmount] = useState('');
   const [ticketCount, setTicketCount] = useState('1');
   const [hasConfirmedStake, setHasConfirmedStake] = useState(false);
+  const [toasts, setToasts] = useState<{ id: string; message: string }[]>([]);
 
   const t = translations[lang];
 
+  const showToast = (message: string) => {
+    const id = Math.random().toString(36).substring(2, 9);
+    setToasts(prev => [...prev, { id, message }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 3000);
+  };
+
   // --- Blockchain Logic ---
+
+  const checkNetwork = async (p: ethers.BrowserProvider) => {
+    const network = await p.getNetwork();
+    if (network.chainId !== 56n) {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x38' }], // BSC Mainnet
+        });
+      } catch (switchError: any) {
+        if (switchError.code === 4902) {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: '0x38',
+              chainName: 'Binance Smart Chain',
+              nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
+              rpcUrls: ['https://bsc-dataseed.binance.org/'],
+              blockExplorerUrls: ['https://bscscan.com/'],
+            }],
+          });
+        }
+      }
+    }
+  };
 
   const connectWallet = async () => {
     if (!window.ethereum || typeof window.ethereum !== 'object') {
@@ -97,6 +131,7 @@ export default function App() {
       }
       setAccount(accounts[0]);
       setProvider(browserProvider);
+      await checkNetwork(browserProvider);
       setError(null);
     } catch (err: any) {
       setError(err.message || t.errors.connectFailed);
@@ -230,6 +265,14 @@ export default function App() {
   };
 
   const handleStake = async () => {
+    if (!account) {
+      showToast(lang === 'zh' ? "一切的一切都要从连接钱包开始" : "Everything starts with connecting your wallet");
+      return;
+    }
+    if (userStats && userStats.balance === 0n) {
+      showToast(lang === 'zh' ? "请先购买代币再点击" : "Please buy tokens before clicking");
+      return;
+    }
     if (!stakeAmount || isNaN(Number(stakeAmount))) {
       setError("Invalid stake amount");
       return;
@@ -245,6 +288,14 @@ export default function App() {
   };
 
   const handleBuyTickets = async () => {
+    if (!account) {
+      showToast(lang === 'zh' ? "一切的一切都要从连接钱包开始" : "Everything starts with connecting your wallet");
+      return;
+    }
+    if (userStats && userStats.balance === 0n) {
+      showToast(lang === 'zh' ? "请先购买代币再点击" : "Please buy tokens before clicking");
+      return;
+    }
     if (!ticketCount || isNaN(Number(ticketCount)) || parseInt(ticketCount) <= 0) {
       setError("Invalid ticket count");
       return;
@@ -260,12 +311,20 @@ export default function App() {
   };
 
   const handleClaim = async () => {
+    if (!account) {
+      showToast(lang === 'zh' ? "一切的一切都要从连接钱包开始" : "Everything starts with connecting your wallet");
+      return;
+    }
     const signer = await provider!.getSigner();
     const lotteryContract = new ethers.Contract(LOTTERY_CONTRACT_ADDRESS, LOTTERY_ABI, signer);
     await handleAction(() => lotteryContract.claimReward(), t.success.rewards);
   };
 
   const handleDraw = async () => {
+    if (!account) {
+      showToast(lang === 'zh' ? "一切的一切都要从连接钱包开始" : "Everything starts with connecting your wallet");
+      return;
+    }
     const signer = await provider!.getSigner();
     const lotteryContract = new ethers.Contract(LOTTERY_CONTRACT_ADDRESS, LOTTERY_ABI, signer);
     await handleAction(() => lotteryContract.drawLottery(), t.success.draw);
@@ -319,7 +378,7 @@ export default function App() {
               <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
                 <Trophy className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold tracking-tight text-slate-900">马彩大乐透</span>
+              <span className="text-xl font-bold tracking-tight text-slate-900">ai起飞大乐透</span>
             </div>
             
             <div className="flex items-center gap-2 sm:gap-4">
@@ -352,6 +411,24 @@ export default function App() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Toast Notifications */}
+        <div className="fixed top-20 right-4 z-[100] flex flex-col gap-3 pointer-events-none">
+          <AnimatePresence>
+            {toasts.map(toast => (
+              <motion.div
+                key={toast.id}
+                initial={{ opacity: 0, x: 50, scale: 0.9 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: 20, scale: 0.9 }}
+                className="bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-auto border border-white/10 backdrop-blur-md"
+              >
+                <Info className="w-4 h-4 text-emerald-400" />
+                <span className="text-sm font-bold">{toast.message}</span>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+
         {/* Notifications */}
         <AnimatePresence>
           {error && (
@@ -394,12 +471,12 @@ export default function App() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   <StatCard 
                     title={t.totalStaked} 
-                    value={stats ? `${formatEther(stats.totalStaked)} TOKEN` : "---"} 
+                    value={stats ? `${formatEther(stats.totalStaked)} AI` : "---"} 
                     icon={Coins}
                   />
                   <StatCard 
                     title={t.prizePool} 
-                    value={stats ? `${formatEther(stats.totalPool)} TOKEN` : "---"} 
+                    value={stats ? `${formatEther(stats.totalPool)} AI` : "---"} 
                     icon={Trophy}
                     subValue={`${t.round} #${stats?.currentRound.toString() || '1'}`}
                   />
@@ -421,12 +498,12 @@ export default function App() {
                   <div className="bg-white rounded-3xl p-6 border border-slate-100 flex flex-wrap gap-8 items-center justify-center sm:justify-start">
                     <div>
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t.yourBalance}</p>
-                      <p className="text-xl font-bold text-slate-900">{formatEther(userStats.balance)} TOKEN</p>
+                      <p className="text-xl font-bold text-slate-900">{formatEther(userStats.balance)} AI</p>
                     </div>
                     <div className="w-px h-8 bg-slate-100 hidden sm:block" />
                     <div>
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t.totalStaked}</p>
-                      <p className="text-xl font-bold text-emerald-600">{formatEther(userStats.stakedBalance)} TOKEN</p>
+                      <p className="text-xl font-bold text-emerald-600">{formatEther(userStats.stakedBalance)} AI</p>
                     </div>
                   </div>
                 )}
@@ -484,7 +561,7 @@ export default function App() {
                         className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                       />
                       <label htmlFor="confirm-stake" className="text-xs font-medium text-slate-500 cursor-pointer">
-                        {lang === 'en' ? "I understand tokens are non-redeemable" : "我已了解代币不可赎回"}
+                        {lang === 'en' ? "I understand AI are non-redeemable" : "我已了解 AI 不可赎回"}
                       </label>
                     </div>
 
@@ -529,6 +606,19 @@ export default function App() {
                         +
                       </button>
                     </div>
+
+                    <div className="grid grid-cols-3 gap-2">
+                      {[10, 100, 1000].map(val => (
+                        <button
+                          key={val}
+                          onClick={() => setTicketCount((prev) => (parseInt(prev || '0') + val).toString())}
+                          className="py-2 bg-slate-50 hover:bg-slate-100 border border-slate-100 rounded-xl text-xs font-bold text-slate-600 transition-all active:scale-95"
+                        >
+                          +{val}
+                        </button>
+                      ))}
+                    </div>
+
                     <button 
                       onClick={handleBuyTickets}
                       disabled={txPending || !account}
@@ -694,7 +784,7 @@ export default function App() {
             <div className="w-6 h-6 bg-emerald-500 rounded flex items-center justify-center">
               <Trophy className="w-4 h-4 text-white" />
             </div>
-            <span className="font-bold text-slate-900">马彩大乐透</span>
+            <span className="font-bold text-slate-900">ai起飞大乐透</span>
           </div>
           <p className="text-sm text-slate-500 max-w-md mx-auto">
             {t.footerDesc}
