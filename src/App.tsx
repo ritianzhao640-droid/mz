@@ -26,7 +26,7 @@ import {
   LOTTERY_CONTRACT_ADDRESS, 
   TOKEN_CONTRACT_ADDRESS, 
   LOTTERY_ABI, 
-  ERC20_ABI 
+  TOKEN_ABI 
 } from './contracts/config';
 import { cn, formatAddress, formatEther } from './utils';
 import { translations } from './translations';
@@ -152,7 +152,7 @@ export default function App() {
 
     try {
       const lotteryContract = new ethers.Contract(LOTTERY_CONTRACT_ADDRESS, LOTTERY_ABI, provider);
-      const tokenContract = new ethers.Contract(TOKEN_CONTRACT_ADDRESS, ERC20_ABI, provider);
+      const tokenContract = new ethers.Contract(TOKEN_CONTRACT_ADDRESS, TOKEN_ABI, provider);
 
       const [
         totalStaked,
@@ -260,7 +260,7 @@ export default function App() {
 
   const approveToken = async (amount: bigint) => {
     const signer = await provider!.getSigner();
-    const tokenContract = new ethers.Contract(TOKEN_CONTRACT_ADDRESS, ERC20_ABI, signer);
+    const tokenContract = new ethers.Contract(TOKEN_CONTRACT_ADDRESS, TOKEN_ABI, signer);
     return tokenContract.approve(LOTTERY_CONTRACT_ADDRESS, amount);
   };
 
